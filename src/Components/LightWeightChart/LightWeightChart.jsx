@@ -7,7 +7,9 @@ import { erc_abi } from "../../Services/erc20_abi";
 import { uniswap_abi } from "../../Services/uniswap_pair_v2_abi";
 import { fetchData } from "../../Services/fetchData";
 import { fetchDecimals } from "../../Services/decimalMethods";
-import { isEmpty } from "lodash";
+import { useSelector, useDispatch } from "react-redux";
+import { selectDataPoints, updateChart } from "../../reducers/chart/chartSlice";
+import { cloneDeep } from "lodash";
 const colors = {
   backgroundColor: "white",
   lineColor: "#2962FF",
@@ -16,7 +18,7 @@ const colors = {
   areaBottomColor: "rgba(41, 98, 255, 0.28)",
 };
 
-const LightWeightChart = ({ dataPoints, setDataPoints }) => {
+const LightWeightChart = () => {
   const {
     backgroundColor,
     lineColor,
@@ -25,15 +27,15 @@ const LightWeightChart = ({ dataPoints, setDataPoints }) => {
     areaBottomColor,
   } = colors;
   const chartContainerRef = useRef();
-
+  const dispatch = useDispatch();
+  const dataPoints = useSelector(selectDataPoints);
   const addDataPoint = (time, price) => {
-    console.log("ADD DATA POINT", { time, price });
-    setDataPoints(dataPoints.concat({ time: time, value: 1 + price }));
+    console.log("NEW DATA POINT", { time, price });
+    dispatch(updateChart({ time: time, value: price }));
   };
 
   useEffect(() => {
     console.log("CHAR UE");
-    console.log("dataPoints", dataPoints);
     const myPriceFormatter = (p) => p.toExponential(4);
     const handleResize = () => {
       chart.applyOptions({ width: chartContainerRef.current.clientWidth });
@@ -69,8 +71,9 @@ const LightWeightChart = ({ dataPoints, setDataPoints }) => {
       },
     });
 
-    if (!isEmpty(dataPoints)) {
-      newSeries.setData(dataPoints);
+    if (dataPoints.length > 0) {
+      const cleanDataPoints = cloneDeep(dataPoints);
+      newSeries.setData(cleanDataPoints);
     }
     window.addEventListener("resize", handleResize);
 
@@ -90,7 +93,7 @@ const LightWeightChart = ({ dataPoints, setDataPoints }) => {
 
   useEffect(() => {
     const infuraId = "f370c580e10c471cbe322f4674cd06c8"; // Replace with your Infura project ID
-    const pairAddress = "0x2cC846fFf0b08FB3bFfaD71f53a60B4b6E6d6482"; // Replace with the contract address of your pair
+    const pairAddress = "0x0f197ad4E350e0c7805821d41EE5AA51acF6559E"; // Replace with the contract address of your pair
     const pairAbi = uniswap_abi;
     const erc20Abi = erc_abi;
     console.log("UE");

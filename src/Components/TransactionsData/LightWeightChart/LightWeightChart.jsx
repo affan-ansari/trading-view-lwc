@@ -47,6 +47,8 @@ const LightWeightChart = () => {
   const savedDataPoints = useSelector(selectSavedDataPoints);
   const credentials = useSelector(selectCredentials);
   const [play, setPlay] = useState(true);
+  const [series, setSeries] = useState(null);
+  const [newChart, setNewChart] = useState(null);
 
   const addDataPoint = (time, price) => {
     console.log("NEW DATA POINT", { time, price });
@@ -58,6 +60,28 @@ const LightWeightChart = () => {
       navigate("/");
     }
   }, [credentials]);
+
+  useEffect(() => {
+    if (series !== null && newChart !== null && play) {
+      const next = cloneDeep(dataPoints[dataPoints.length - 1]);
+      series.update(next);
+      newChart.timeScale().fitContent();
+    }
+  }, [dataPoints]);
+
+  useEffect(() => {
+    if (series !== null && newChart !== null) {
+      if (play) {
+        const cleanDataPoints = cloneDeep(dataPoints);
+        series.setData(cleanDataPoints);
+        newChart.timeScale().fitContent();
+      } else {
+        const cleanDataPoints = cloneDeep(savedDataPoints);
+        series.setData(cleanDataPoints);
+        newChart.timeScale().fitContent();
+      }
+    }
+  }, [play]);
 
   useEffect(() => {
     if (credentials.infuraId && credentials.pairAddress) {
@@ -109,6 +133,8 @@ const LightWeightChart = () => {
         const cleanDataPoints = cloneDeep(savedDataPoints);
         newSeries.setData(cleanDataPoints);
       }
+      setSeries(newSeries);
+      setNewChart(chart);
       window.addEventListener("resize", handleResize);
 
       return () => {
@@ -117,19 +143,7 @@ const LightWeightChart = () => {
         chart.remove();
       };
     }
-  }, [
-    play
-      ? [
-          backgroundColor,
-          lineColor,
-          textColor,
-          areaTopColor,
-          areaBottomColor,
-          dataPoints,
-          credentials,
-        ]
-      : null,
-  ]);
+  }, []);
 
   useEffect(() => {
     if (credentials.infuraId && credentials.pairAddress) {

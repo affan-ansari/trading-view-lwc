@@ -22,6 +22,7 @@ const rows = [
 const TransactionsTable = () => {
   return (
     <TableContainer component={Paper}>
+      <h1>Table Place holder</h1>
       <Table sx={{ minWidth: 650 }} aria-label="simple table">
         <TableHead>
           <TableRow>

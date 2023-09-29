@@ -11,7 +11,7 @@ const TransactionsData = () => {
       <div className={styles.container}>
         <div className={styles.dataContainer}>
           <LightWeightChart />
-          {/* <TransactionsTable /> */}
+          <TransactionsTable />
         </div>
       </div>
     </div>

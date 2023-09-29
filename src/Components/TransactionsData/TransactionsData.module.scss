@@ -1,0 +1,15 @@
+.container {
+  display: flex;
+  justify-content: center;
+  margin-top: 50px;
+  margin-bottom: 50px;
+}
+.dataContainer {
+  background-color: #142028;
+  padding: 20px 40px 40px 40px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 50px;
+  border-radius: 18px;
+}

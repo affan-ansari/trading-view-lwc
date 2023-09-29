@@ -1,5 +1,8 @@
 export const fetchData = (contract, decimals, handleEvent) => {
   console.log("fetch method");
+  // setInterval(() => {
+  //   handleEvent(Math.floor(Date.now() / 1000), Math.random());
+  // }, 1000);
   contract.events
     .Swap(
       {

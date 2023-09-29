@@ -1,0 +1,45 @@
+.header {
+  display: flex;
+  // justify-content: flex-end;
+  margin-bottom: 10px;
+  gap: 10px;
+  color: #EFEFEF;
+}
+.btnContainer {
+  flex-grow: 1;
+  .pauseBtn {
+    background-color: #06A95C;
+    width: 100px;
+    &:hover {
+      background-color: #14e881;
+    }
+  }
+  .playBtn {
+    background-color: #23323C;
+    width: 100px;
+    &:hover {
+      background: #324654;
+    }
+  }
+}
+.price {
+  font-size: larger;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #23323C;
+  border-radius: 10px;
+  padding: 3px 7px 3px 7px;
+}
+.latestData {
+  text-align: right;
+  font-size: small;
+  background-color: #23323C;
+  border-radius: 10px;
+  padding: 3px 7px 3px 7px;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  // align-items: center;
+  justify-content: center;
+}

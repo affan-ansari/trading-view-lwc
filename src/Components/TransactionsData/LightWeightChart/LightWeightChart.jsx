@@ -14,7 +14,6 @@ import {
   updateChart,
   saveCurrentChart,
   selectSavedDataPoints,
-  updateLatestPrice,
 } from "../../../reducers/chart/chartSlice";
 import { cloneDeep } from "lodash";
 import { selectCredentials } from "../../../reducers/credentials/credentialsSlice";

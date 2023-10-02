@@ -1,7 +1,10 @@
 import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
-  credentials: { infuraId: "", pairAddress: "" },
+  credentials: {
+    infuraId: "f370c580e10c471cbe322f4674cd06c8",
+    pairAddress: "0x2cC846fFf0b08FB3bFfaD71f53a60B4b6E6d6482",
+  },
 };
 
 export const credentialsSlice = createSlice({
@@ -9,7 +12,6 @@ export const credentialsSlice = createSlice({
   initialState,
   reducers: {
     storeCredentials: (state, action) => {
-      console.log(action.payload);
       state.credentials = action.payload;
     },
   },

@@ -5,6 +5,13 @@ export const latestPrice = (dataPoints) => {
   return "---";
 };
 
+export const latestPriceUsd = (tableData) => {
+  if (tableData.length > 0) {
+    return tableData[0].priceUsd.toFixed(4);
+  }
+  return "---";
+};
+
 export const percentageDifference = (dataPoints) => {
   const lastIdx = dataPoints.length - 1;
   if (dataPoints.length > 1) {
@@ -17,6 +24,22 @@ export const percentageDifference = (dataPoints) => {
     else return `- ${(-1 * difference).toString()}`;
   }
   return "---";
+};
+
+export const convertPrice = (exchangeRates) => {
+  if (exchangeRates.USD) {
+    return parseFloat(exchangeRates.USD);
+  }
+  if (exchangeRates.USDT) {
+    return parseFloat(exchangeRates.USDT);
+  }
+  if (exchangeRates.USDC) {
+    return parseFloat(exchangeRates.USDC);
+  }
+  if (exchangeRates.BUSD) {
+    return parseFloat(exchangeRates.BUSD);
+  }
+  return 0;
 };
 
 export const ethereumAddressRegex = /^(0x)?[0-9a-fA-F]{40}$/;

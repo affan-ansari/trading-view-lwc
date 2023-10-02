@@ -1,7 +1,12 @@
 export const fetchData = (contract, decimals, handleEvent) => {
   console.log("fetch method");
   // setInterval(() => {
-  //   handleEvent(Math.floor(Date.now() / 1000), Math.random());
+  //   handleEvent(
+  //     Date.now(),
+  //     Math.random(),
+  //     Math.random() > 5 ? "sell" : "buy",
+  //     "0xd3B4F5b4CF06498E4fBdD71c9da4F5bEFE01A0ed"
+  //   );
   // }, 3000);
   contract.events
     .Swap(
@@ -15,13 +20,14 @@ export const fetchData = (contract, decimals, handleEvent) => {
     )
     .on("data", function (txData) {
       console.log("after", txData);
-      const { txType, price } = calculatePrice(decimals, txData);
-      handleEvent(Date.now() / 1000, price);
+      const { txType, price, sender } = calculatePrice(decimals, txData);
+      handleEvent(Date.now(), price, txType, sender);
     });
 };
 
 const calculatePrice = ({ dec0, dec1 }, txData) => {
-  const { amount0In, amount0Out, amount1In, amount1Out } = txData.returnValues;
+  const { amount0In, amount0Out, amount1In, amount1Out, sender } =
+    txData.returnValues;
   let txType, price;
   if (amount0In > 0) {
     txType = "sell";
@@ -35,5 +41,5 @@ const calculatePrice = ({ dec0, dec1 }, txData) => {
     const amount0_out = Number(amount0Out) / Math.pow(10, Number(dec0));
     price = amount1_in / amount0_out;
   }
-  return { txType, price };
+  return { txType, price, sender };
 };

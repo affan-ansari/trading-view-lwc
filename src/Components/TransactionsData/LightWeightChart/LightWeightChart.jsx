@@ -14,6 +14,9 @@ import {
   updateChart,
   saveCurrentChart,
   selectSavedDataPoints,
+  updateTable,
+  saveExchangeRates,
+  selectTableData,
 } from "../../../reducers/chart/chartSlice";
 import { cloneDeep } from "lodash";
 import { selectCredentials } from "../../../reducers/credentials/credentialsSlice";
@@ -22,7 +25,12 @@ import styles from "./LightWeightChart.module.scss";
 import PlayArrowIcon from "@mui/icons-material/PlayArrow";
 import PauseIcon from "@mui/icons-material/Pause";
 import { Button } from "@mui/material";
-import { latestPrice, percentageDifference } from "../../../helperFunctions";
+import {
+  latestPrice,
+  latestPriceUsd,
+  percentageDifference,
+} from "../../../helperFunctions";
+import { getExchangeRates } from "../../../Services/apis";
 
 const colors = {
   backgroundColor: "#161825",
@@ -43,16 +51,37 @@ const LightWeightChart = () => {
   const chartContainerRef = useRef();
   const dispatch = useDispatch();
   const navigate = useNavigate();
+
   const dataPoints = useSelector(selectDataPoints);
   const savedDataPoints = useSelector(selectSavedDataPoints);
   const credentials = useSelector(selectCredentials);
+  const tableData = useSelector(selectTableData);
+
   const [play, setPlay] = useState(true);
   const [series, setSeries] = useState(null);
   const [newChart, setNewChart] = useState(null);
+  const [symbols, setSymbols] = useState({});
 
-  const addDataPoint = (time, price) => {
-    console.log("NEW DATA POINT", { time, price });
-    dispatch(updateChart({ time: time, value: price }));
+  const options = {
+    month: "short",
+    day: "numeric",
+    hour: "numeric",
+    minute: "numeric",
+    second: "numeric",
+    hour12: true,
+  };
+  const formatter = new Intl.DateTimeFormat("en-US", options);
+  const addDataPoint = (time, price, type, maker) => {
+    dispatch(updateChart({ time: Math.floor(time / 1000), value: price }));
+    dispatch(
+      updateTable({
+        date: formatter.format(time),
+        type: type,
+        priceUsd: price,
+        priceEth: price, //converted inside the reducer
+        maker: maker,
+      })
+    );
   };
 
   useEffect(() => {
@@ -85,7 +114,6 @@ const LightWeightChart = () => {
 
   useEffect(() => {
     if (credentials.infuraId && credentials.pairAddress) {
-      console.log("CHAR UE");
       const myPriceFormatter = (p) => p.toExponential(4);
       const handleResize = () => {
         chart.applyOptions({ width: chartContainerRef.current.clientWidth });
@@ -151,7 +179,6 @@ const LightWeightChart = () => {
       // const pairAddress = "0xd3B4F5b4CF06498E4fBdD71c9da4F5bEFE01A0ed"; // Replace with the contract address of your pair
       const pairAbi = uniswap_abi;
       const erc20Abi = erc_abi;
-      console.log("UE");
       const web3 = new Web3(
         new Web3.providers.WebsocketProvider(
           `wss://mainnet.infura.io/ws/v3/${credentials.infuraId}`
@@ -161,16 +188,20 @@ const LightWeightChart = () => {
         pairAbi,
         credentials.pairAddress
       );
-      fetchDecimals(web3, pairContract, erc20Abi)
-        .then((decimals) => {
-          console.log(decimals);
-          fetchData(pairContract, decimals, addDataPoint);
-        })
-        .catch((error) => {
-          console.error("Error fetching the decimals:", error);
-        });
+
+      getExchangeRates().then((response) => {
+        dispatch(saveExchangeRates(response.data.data.rates));
+        fetchDecimals(web3, pairContract, erc20Abi)
+          .then((data) => {
+            const { dec0, dec1, sym0, sym1 } = data;
+            setSymbols({ sym0, sym1 });
+            fetchData(pairContract, { dec0, dec1 }, addDataPoint);
+          })
+          .catch((error) => {
+            console.error("Error fetching the decimals:", error);
+          });
+      });
       return () => {
-        console.log("closing");
         web3.currentProvider?.connection?.close();
       };
     }
@@ -194,14 +225,21 @@ const LightWeightChart = () => {
             {play ? "Pause" : "Play"}
           </Button>
         </div>
-        <div className={styles.price}>
-          <strong>$321321</strong>
+        <div className={styles.symbols}>
+          <strong>{`${symbols.sym0 ? symbols.sym0 : "---"} / ${
+            symbols.sym1 ? symbols.sym1 : "---"
+          }`}</strong>
         </div>
-        <div className={styles.latestData}>
-          <div>
-            {percentageDifference(play ? dataPoints : savedDataPoints)} %
+        <div className={styles.priceContainer}>
+          <div className={styles.price}>
+            <strong>${latestPriceUsd(tableData)}</strong>
           </div>
-          <div>{latestPrice(play ? dataPoints : savedDataPoints)} ETH</div>
+          <div className={styles.latestData}>
+            <div>
+              {percentageDifference(play ? dataPoints : savedDataPoints)} %
+            </div>
+            <div>{latestPrice(play ? dataPoints : savedDataPoints)} ETH</div>
+          </div>
         </div>
       </div>
       <div ref={chartContainerRef} />
